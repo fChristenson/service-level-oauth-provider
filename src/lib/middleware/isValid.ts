@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { Scope, AccessTokenValue } from "../services/AccessTokenService/AccessToken";
+import { Scope, AccessTokenValue, IAccessToken } from "../services/AccessTokenService/AccessToken";
 import { accessTokenService } from "../services";
 
-export const hasScope = (...scopes: Scope[]) => async (req: Request, res: Response, next: NextFunction) => {
+export const isValid = (...scopes: Scope[]) => async (req: Request, res: Response, next: NextFunction) => {
   const auth = req.headers.authorization;
 
   if (!auth) {
@@ -15,6 +15,8 @@ export const hasScope = (...scopes: Scope[]) => async (req: Request, res: Respon
   if(!token) {
     return res.status(404).json({msg: "No token found"});
   }
+
+  if(hasExpired(token)) return res.status(401).json({msg: "Token expired"});
 
   const tokenScopes = token.scope.split(" ");
   const hasScope = scopes
@@ -42,3 +44,9 @@ export const hasScope = (...scopes: Scope[]) => async (req: Request, res: Respon
 const isTemplate = (str: string) => {
   return /^:/.test(str);
 };
+
+export const hasExpired = (token: IAccessToken) => {
+  const now = Date.now();
+  const expiresAt = token.createdAt + (token.ttlInSeconds * 1000);
+  return now > expiresAt;
+}

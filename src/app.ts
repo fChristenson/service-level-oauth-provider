@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { accessTokenService } from "./lib/services";
 import { IAccessTokenRequest, AccessToken, AccessTokenResponse } from "./lib/services/AccessTokenService/AccessToken";
 import { users } from "./lib/constants/users";
-import { hasScope } from "./lib/middleware/hasScope";
+import { isValid } from "./lib/middleware/isValid";
 
 export const app = express();
 
@@ -42,15 +42,15 @@ app.get("/api/v1/auth/token", async (req: Request, res: Response) => {
 });
 
 // Oauth secured routes
-app.get("/api/v1/users", hasScope("users"), (_: Request, res: Response) => {
+app.get("/api/v1/users", isValid("users"), (_: Request, res: Response) => {
   res.json(users);
 });
 
-app.get("/api/v1/users/:userId", hasScope("users", ":userId"), (req: Request, res: Response) => {
+app.get("/api/v1/users/:userId", isValid("users", ":userId"), (req: Request, res: Response) => {
   res.json(users.find(u => u.id == req.params.userId));
 });
 
-app.delete("/api/v1/users/:userId", hasScope("users", ":userId", "delete_user"), (req: Request, res: Response) => {
+app.delete("/api/v1/users/:userId", isValid("users", ":userId", "delete_user"), (req: Request, res: Response) => {
   // Delete user
   res.json({msg: "Deleted", user: users.find(u => u.id == req.params.userId)});
 });

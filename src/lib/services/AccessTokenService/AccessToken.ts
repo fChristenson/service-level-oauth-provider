@@ -9,14 +9,14 @@ export interface IAccessToken {
   scope: Scope;
   clientId: ClientId;
   ttlInSeconds: number;
-  createdAt: Date;
+  createdAt: number;
   value: AccessTokenValue;
 }
 
 export const AccessToken = (clientId: ClientId, scope: Scope) => {
   return {
     ttlInSeconds: TTL,
-    createdAt: new Date(),
+    createdAt: new Date().getTime(),
     value: crypto.randomBytes(128).toString("base64"),
     clientId,
     scope
